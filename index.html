@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Quiet, calm, and cozy Maine places for solo travelers.">
+  <title>Pine Companion | Quiet Maine Places</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#discover">Skip to places</a>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Pine Companion home">
+      <span class="brand-mark" aria-hidden="true">♧</span>
+      <span><strong>Pine Companion</strong><small>Quiet Maine for solo travelers</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Primary navigation">
+      <a class="nav-link active" href="#discover">Explore</a>
+      <button class="nav-link" id="savedButton" type="button">Saved <span id="savedCount">0</span></button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>Find a quieter<br><em>corner of Maine.</em></h1>
+        <p>Peaceful walks, cozy bookshops, calm coastlines, and low-pressure stops for solo travelers who prefer a slower pace.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#discover">Explore calm places</a>
+          <button class="button secondary" id="surpriseButton" type="button">Pick one for me</button>
+        </div>
+        <div class="quiet-note"><span>◌</span><p>Quieter doesn't mean empty. Early mornings, weekdays, and off-season are usually the best times to visit.</p></div>
+      </div>
+      <div
+              class="hero-art"
+              aria-label="Illustration of the Maine coast with a lighthouse, pine trees, islands, and a sailboat"
+      >
+        <!-- Soft background clouds -->
+        <div class="cloud cloud-one"></div>
+        <div class="cloud cloud-two"></div>
+
+        <!-- Sun -->
+        <div class="sun"></div>
+
+        <!-- Distant islands -->
+        <div class="island island-one"></div>
+        <div class="island island-two"></div>
+
+        <!-- Pine trees -->
+        <div class="tree t1" aria-hidden="true">▲</div>
+        <div class="tree t2" aria-hidden="true">▲</div>
+        <div class="tree t3" aria-hidden="true">▲</div>
+        <div class="tree t4" aria-hidden="true">▲</div>
+
+        <!-- Lighthouse -->
+        <div class="lighthouse">
+          <div class="lighthouse-light"></div>
+          <div class="lighthouse-window"></div>
+          <div class="lighthouse-door"></div>
+        </div>
+
+        <!-- Rocky shoreline -->
+        <div class="shore-rock rock-one"></div>
+        <div class="shore-rock rock-two"></div>
+        <div class="shore-rock rock-three"></div>
+
+        <!-- Water and waves -->
+        <div class="water">
+          <span class="wave wave-one"></span>
+          <span class="wave wave-two"></span>
+          <span class="wave wave-three"></span>
+          <span class="wave wave-four"></span>
+        </div>
+
+        <!-- Sailboat -->
+        <div class="sailboat" aria-hidden="true">
+          <div class="boat-mast"></div>
+          <div class="boat-sail boat-sail-left"></div>
+          <div class="boat-sail boat-sail-right"></div>
+          <div class="boat-hull"></div>
+          <div class="boat-shadow"></div>
+        </div>
+
+        <!-- Current Portland, Maine weather -->
+        <div class="float-card weather-card" id="weatherCard">
+    <span
+            class="weather-icon"
+            id="weatherIcon"
+            aria-hidden="true"
+    >
+      ☁
+    </span>
+
+          <div>
+            <small id="weatherLocation">Portland, Maine</small>
+            <strong id="weatherStatus">Loading weather…</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mood-strip" aria-label="Explore by mood">
+      <button class="mood-card" data-filter="coastal"><span>≈</span><div><strong>Coastal</strong><small>Ocean and harbor air</small></div></button>
+      <button class="mood-card" data-filter="cozy"><span>⌂</span><div><strong>Cozy</strong><small>Books, gardens, cafés</small></div></button>
+      <button class="mood-card" data-filter="peaceful"><span>☾</span><div><strong>Peaceful</strong><small>Low-key places to wander</small></div></button>
+      <button class="mood-card" data-filter="easy"><span>P</span><div><strong>Easy parking</strong><small>Less arrival stress</small></div></button>
+    </section>
+
+    <section class="discover" id="discover">
+      <div class="section-heading">
+        <div><span class="eyebrow">Calm places across Maine</span><h2>Choose your pace</h2></div>
+        <p id="resultCount"></p>
+      </div>
+      <div class="toolbar">
+        <div class="filters" role="group" aria-label="Filter places">
+          <button class="filter active" data-filter="all">All places</button>
+          <button class="filter" data-filter="coastal">Coastal</button>
+          <button class="filter" data-filter="cozy">Cozy</button>
+          <button class="filter" data-filter="peaceful">Peaceful</button>
+          <button class="filter" data-filter="easy">Easy parking</button>
+        </div>
+        <label class="search"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Search town or place" aria-label="Search town or place"></label>
+      </div>
+      <div class="explore-grid">
+        <div id="placeList" class="place-list" aria-live="polite"></div>
+        <aside class="map-wrap"><div id="map" aria-label="Map of Maine places"></div><button id="mapReset" class="map-reset">View all</button></aside>
+      </div>
+    </section>
+
+    <section class="saved-section" id="savedSection" hidden>
+      <div class="saved-heading"><div><span class="eyebrow">Your tranquil getaway list</span><h2>Saved places</h2></div><button id="closeSaved">Close</button></div>
+      <div id="savedGrid" class="saved-grid"></div>
+      <div id="emptyState" class="empty-state"><span>♡</span><h3>No saved places yet</h3><p>Use the heart on a place that feels like your kind of day.</p></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-top">
+      <a class="footer-brand" href="#top">
+        <span class="footer-brand-mark" aria-hidden="true">♧</span>
+        <span><strong>Pine Companion</strong><small>Quiet Maine for solo travelers</small></span>
+      </a>
+      <div class="footer-links">
+        <section aria-labelledby="about-heading">
+          <h2 id="about-heading">About</h2>
+          <p>Pine Companion is for solo travelers who feel happiest with calm coastlines, cozy corners, and unhurried Maine adventures.</p>
+        </section>
+        <section aria-labelledby="privacy-heading">
+          <h2 id="privacy-heading">Privacy Policy</h2>
+          <p>Pine Companion doesn't collect personal information. Saved places stay in your browser using local storage and can be cleared at any time.</p>
+        </section>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; <span id="copyrightYear"></span><a href="#top"> Pine Companion</a>. All rights reserved.</p>
+      <p>Crowds, hours, access, and parking can change. Check the official destination before leaving.</p>
+    </div>
+  </footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
