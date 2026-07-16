@@ -7,6 +7,12 @@ Rather than focusing on crowded tourist attractions, the app highlights
 calm coastlines, independent bookshops, gardens, parks, scenic walks,
 and other places suited to slower, more intentional travel.
 
+## 🌐 Live Demo
+
+Explore Pine Companion here:
+
+**[pinecompanion.xyz](https://pinecompanion.xyz)**
+
 ## ✨ Features
 
 -   Explore real destinations across Maine
@@ -55,10 +61,10 @@ http://localhost:8000
 Each destination includes a **Calm Match** label describing the type of
 experience the place may offer.
 
--   **Very calm** --- ideal for a peaceful, low-key outing
--   **Calm** --- generally relaxed, especially outside peak times
--   **Cozy calm** --- a comfortable indoor or small-town experience
--   **Cozy stop** --- relaxing, but potentially more active because of
+-   **Very calm** - ideal for a peaceful, low-key outing
+-   **Calm** - generally relaxed, especially outside peak times
+-   **Cozy calm** - a comfortable indoor or small-town experience
+-   **Cozy stop** - relaxing, but potentially more active because of
     its location
 
 Calm Match is just a guide. It's not a safety score or a
