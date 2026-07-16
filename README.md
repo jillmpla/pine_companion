@@ -119,4 +119,4 @@ See [`LICENSE.txt`](./LICENSE.txt) for the full license terms.
 
 ## ⭐ Support the Project
 
-If you find Pine Companion useful, consider giving the repository a star.
+If you find **Pine Companion** useful, consider giving the repository a star.
