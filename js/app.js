@@ -9,12 +9,54 @@
    APPLICATION STATE
 ========================================================= */
 
+/**
+ * Loads saved destination IDs from localStorage.
+ * Invalid values are ignored and duplicate IDs are removed.
+ */
+function loadSavedPlaces() {
+    try {
+        const storedValue = JSON.parse(
+            localStorage.getItem("pineQuietSaved") || "[]"
+        );
+
+        if (!Array.isArray(storedValue)) {
+            return [];
+        }
+
+        return [...new Set(storedValue)].filter((placeId) =>
+            places.some((place) => place.id === placeId)
+        );
+    } catch (error) {
+        console.warn("Unable to read saved places:", error);
+        return [];
+    }
+}
+
+
+/**
+ * Writes the current saved-place list to localStorage.
+ */
+function storeSavedPlaces() {
+    try {
+        localStorage.setItem(
+            "pineQuietSaved",
+            JSON.stringify(state.saved)
+        );
+
+        return true;
+    } catch (error) {
+        console.error("Unable to save places:", error);
+        return false;
+    }
+}
+
+
 // Stores the current filter, search term, saved places,
 // Leaflet map instance, and active map markers.
 const state = {
     filter: "all",
     search: "",
-    saved: JSON.parse(localStorage.getItem("pineQuietSaved") || "[]"),
+    saved: loadSavedPlaces(),
     map: null,
     markers: new Map()
 };
@@ -178,7 +220,7 @@ function setFilter(filterName) {
 /**
  * Renders the main list of destinations.
  */
-function renderPlaces() {
+function renderPlaces(updateMap = true) {
     const visiblePlaces = getVisiblePlaces();
 
     resultCount.textContent =
@@ -194,7 +236,10 @@ function renderPlaces() {
       </div>
     `;
 
-        updateMapMarkers([]);
+        if (updateMap) {
+            updateMapMarkers([]);
+        }
+
         return;
     }
 
@@ -253,7 +298,10 @@ function renderPlaces() {
         .join("");
 
     bindPlaceCardEvents();
-    updateMapMarkers(visiblePlaces);
+
+    if (updateMap) {
+        updateMapMarkers(visiblePlaces);
+    }
 }
 
 
@@ -261,7 +309,7 @@ function renderPlaces() {
  * Adds click and keyboard events to newly rendered place cards.
  */
 function bindPlaceCardEvents() {
-    selectAll(".place-card").forEach((card) => {
+    placeList.querySelectorAll(".place-card").forEach((card) => {
         card.addEventListener("click", (event) => {
             // Do not open the map marker when the save button is clicked.
             if (!event.target.closest("[data-save]")) {
@@ -270,13 +318,19 @@ function bindPlaceCardEvents() {
         });
 
         card.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
+            // Pressing Enter on a heart should only activate the heart.
+            if (
+                event.key === "Enter" &&
+                !event.target.closest("[data-save]")
+            ) {
                 focusPlaceOnMap(card.dataset.id);
             }
         });
     });
 
-    selectAll("[data-save]").forEach((button) => {
+    // Only bind hearts inside the main destination list.
+    // Saved-list hearts receive their listeners in renderSavedPlaces().
+    placeList.querySelectorAll("[data-save]").forEach((button) => {
         button.addEventListener("click", (event) => {
             event.stopPropagation();
             toggleSavedPlace(button.dataset.save);
@@ -304,20 +358,22 @@ function toggleSavedPlace(placeId) {
     }
 
     // Save the updated list in the visitor's browser.
-    localStorage.setItem(
-        "pineQuietSaved",
-        JSON.stringify(state.saved)
-    );
+    const savedSuccessfully = storeSavedPlaces();
 
     updateSavedCount();
 
     showToast(
-        isAlreadySaved
-            ? "Removed from saved places"
-            : "Saved for a quiet day"
+        savedSuccessfully
+            ? (
+                isAlreadySaved
+                    ? "Removed from saved places"
+                    : "Saved for a quiet day"
+            )
+            : "Saved places could not be updated"
     );
 
-    renderPlaces();
+    // Refresh heart states without resetting the current map view.
+    renderPlaces(false);
     renderSavedPlaces();
 }
 
@@ -331,7 +387,7 @@ function updateSavedCount() {
 
 
 /**
- * Renders the saved destination cards.
+ * Renders every destination currently saved by the visitor.
  */
 function renderSavedPlaces() {
     const savedPlaces = places.filter((place) =>
@@ -341,57 +397,65 @@ function renderSavedPlaces() {
     savedGrid.innerHTML = savedPlaces
         .map((place) => {
             return `
-        <article class="saved-card">
-          <div class="place-image">
-            ${createPlaceArtwork(place)}
-          </div>
+                <article class="saved-card">
+                    <div class="place-image">
+                        ${createPlaceArtwork(place)}
+                    </div>
 
-          <span class="place-type">
-            ${escapeHTML(place.type)} · ${escapeHTML(place.town)}
-          </span>
+                    <span class="place-type">
+                        ${escapeHTML(place.type)} · ${escapeHTML(place.town)}
+                    </span>
 
-          <h3>${escapeHTML(place.name)}</h3>
+                    <h3>${escapeHTML(place.name)}</h3>
 
-          <p class="place-note">
-            ${escapeHTML(place.note)}
-          </p>
+                    <p class="place-note">
+                        ${escapeHTML(place.note)}
+                    </p>
 
-          <div class="place-tags">
-              <span class="pill calm">Calm match: Calm</span>
-              <span class="pill">Morning or sunset</span>
-              <span class="pill">Designated parking across street</span>
-          </div>
-            
-            <div class="saved-card-footer">
-              <button
-                class="save-button saved"
-                data-save="barretts-park"
-                aria-label="Remove Barrett’s Park"
-              >
-                ♥
-              </button>
-            </div>
-        </article>
-      `;
+                    <!-- All destination details stay together -->
+                    <div class="place-tags">
+                        <span class="pill calm">
+                            Calm match: ${escapeHTML(place.calmMatch)}
+                        </span>
+
+                        <span class="pill">
+                            ${escapeHTML(place.bestWindow)}
+                        </span>
+
+                        <span class="pill">
+                            ${escapeHTML(place.parking)}
+                        </span>
+                    </div>
+
+                    <!-- Each button now uses its own destination ID -->
+                    <div class="saved-card-footer">
+                        <button
+                            class="save-button saved"
+                            type="button"
+                            data-save="${place.id}"
+                            aria-label="Remove ${escapeHTML(place.name)} from saved places"
+                        >
+                            ♥
+                        </button>
+                    </div>
+                </article>
+            `;
         })
         .join("");
 
     const emptyState = select("#emptyState");
+    const hasSavedPlaces = savedPlaces.length > 0;
 
-    emptyState.style.display =
-        savedPlaces.length ? "none" : "block";
+    emptyState.style.display = hasSavedPlaces ? "none" : "block";
+    savedGrid.style.display = hasSavedPlaces ? "grid" : "none";
 
-    savedGrid.style.display =
-        savedPlaces.length ? "grid" : "none";
-
-    // Attach remove events to buttons inside the saved section.
     savedGrid.querySelectorAll("[data-save]").forEach((button) => {
-        button.addEventListener("click", () => {
+        button.addEventListener("click", (event) => {
+            event.stopPropagation();
             toggleSavedPlace(button.dataset.save);
         });
     });
 }
-
 
 /**
  * Opens the saved places section.
