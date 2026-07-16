@@ -5,7 +5,7 @@ travelers who prefer quiet, cozy, peaceful experiences throughout Maine.
 
 Rather than focusing on crowded tourist attractions, the app highlights
 calm coastlines, independent bookshops, gardens, parks, scenic walks,
-and other places suited to slower, more intentional travel.
+and other places suited to slower travel.
 
 ## 🌐 Live Demo
 
