@@ -37,8 +37,10 @@ body {
     font-family:"DM Sans",sans-serif
 }
 
-button,input {
-    font:inherit
+button,
+input {
+    font:inherit;
+    color:inherit;
 }
 
 button:focus-visible,a:focus-visible,input:focus-visible {
@@ -796,8 +798,23 @@ button:focus-visible,a:focus-visible,input:focus-visible {
     border:0;
     border-radius:15px;
     background:transparent;
+    color:var(--ink);
     text-align:left;
-    cursor:pointer
+    cursor:pointer;
+    appearance:none;
+    -webkit-appearance:none;
+    -webkit-tap-highlight-color:transparent;
+}
+
+.mood-card > span {
+    width:42px;
+    height:42px;
+    display:grid;
+    place-items:center;
+    border-radius:12px;
+    background:var(--sea2);
+    color:var(--pine);
+    font-weight:800;
 }
 
 .mood-card:hover {
